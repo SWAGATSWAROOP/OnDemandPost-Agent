@@ -15,8 +15,10 @@ const api = new GhostAdminAPI({
 // Authentication middleware
 const authenticate = (req, res, next) => {
   const { authorization } = req.headers;
-  const password = process.env.PASSWORD; // Replace with your actual password
+  console.log(authorization);
 
+  const password = process.env.PASSWORD; // Replace with your actual password
+  console.log("password:",password);
   if (!authorization || authorization !== password) {
     return res.status(403).json({ error: "Unauthorized access." });
   }
@@ -111,33 +113,38 @@ app.post("/create-post", authenticate, async (req, res) => {
   try {
     const {
       title,
-      contentSections,
+      // contentSections,
+      html,
       feature_image,
-      status = "draft",
+      status = "published",
     } = req.body;
 
     // Validate required fields
-    if (
-      !title ||
-      !contentSections ||
-      !Array.isArray(contentSections) ||
-      contentSections.length === 0
-    ) {
-      return res.status(400).json({
-        error: "Title and contentSections (non-empty array) are required.",
-      });
-    }
+    // if (
+    //   !title ||
+    //   !contentSections ||
+    //   !Array.isArray(contentSections) ||
+    //   contentSections.length === 0
+    // ) {
+    //   return res.status(400).json({
+    //     error: "Title and contentSections (non-empty array) are required.",
+    //   });
+    // }
 
     // Generate Lexical content
-    const lexicalString = generateRichLexicalContent(contentSections);
+    // const lexicalString = generateRichLexicalContent(contentSections);
 
     // Create the post
-    const post = await api.posts.add({
-      title,
-      lexical: lexicalString,
-      feature_image: feature_image || null, // Optional
-      status: status, // Draft or published
-    });
+    const post = await api.posts.add(
+      {
+        title,
+        // lexical: lexicalString,
+        html,
+        feature_image: feature_image || null, // Optional
+        status: status, // draft or published
+      },
+      { source: "html" }
+    );
 
     res.status(201).json({
       message: "Post created successfully!",

@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const GhostAdminAPI = require("@tryghost/admin-api");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -18,7 +19,7 @@ const authenticate = (req, res, next) => {
   console.log(authorization);
 
   const password = process.env.PASSWORD; // Replace with your actual password
-  console.log("password:",password);
+  console.log("password:", password);
   if (!authorization || authorization !== password) {
     return res.status(403).json({ error: "Unauthorized access." });
   }
@@ -117,6 +118,8 @@ app.post("/create-post", authenticate, async (req, res) => {
       html,
       feature_image,
       status = "published",
+      meta_title,
+      meta_description,
     } = req.body;
 
     // Validate required fields
@@ -142,6 +145,8 @@ app.post("/create-post", authenticate, async (req, res) => {
         html,
         feature_image: feature_image || null, // Optional
         status: status, // draft or published
+        meta_title,
+        meta_description,
       },
       { source: "html" }
     );
